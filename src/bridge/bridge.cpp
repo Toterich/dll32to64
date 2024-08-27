@@ -10,6 +10,9 @@
 #include <string>
 #include <sstream>
 
+// TODO: AUTOGEN
+#include "test_lib.h"
+
 namespace {
 
 bool winSockStartup = false;
@@ -22,9 +25,8 @@ SOCKET callbackSocket = INVALID_SOCKET;
 HANDLE wrapperProcess = INVALID_HANDLE_VALUE;
 
 // User defined callback functions
+// TODO: AUTOGEN
 TCallback callback = NULL;
-TScanCallback scanCallback = NULL;
-TRestartLineCallback restartLineCallback = NULL;
 
 // Thread executing CallbackTask
 std::thread callbackThread;

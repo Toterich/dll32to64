@@ -38,6 +38,18 @@ The following diagram illustrates the data flow from a 64bit client application 
 +=======================+           ||       +=========================+
 ```
 
+## Dependencies
+
+This project uses the `MinGW` compiler toolchain. Additionally, `Python3` is required to execute the build script.
+
+The build has been successfully tested on the [MSYS2](https://www.msys2.org/) environment. Once installed, open an Msys terminal and run the following
+
+```bash
+pacman -Syu
+pacman -Sy mingw-w64-x86_64-toolchain mingw-w64-i686-toolchain python3
+```
+
+
 ## Current State and plans
 
 This is currently only a proof of concept which can't be used for any real problems out of the box. It is hardcoded to bridge the library in `test/test_lib.cpp` to the application in `test/test_app.cpp`.

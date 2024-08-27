@@ -1,0 +1,14 @@
+import os
+
+_cwd = os.path.dirname(os.path.realpath(__file__))
+
+# Modify this if your Mingw compiler is located somewhere else
+COMPILER64 = 'C:/mingw/mingw64/bin/g++.exe'
+COMPILER32 = 'C:/mingw/mingw32/bin/g++.exe'
+
+# Location of build artifacts
+BUILD_DIR = os.path.join(_cwd, 'build')
+BUILD_DIR_TEST = os.path.join(_cwd, 'test', 'build')
+
+# Set to 1 to build debug binaries
+DEBUG = 0
