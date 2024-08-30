@@ -153,7 +153,7 @@ int main()
         }
 
         // Call requested function and craft response
-        // TODO: Autogenerate
+        // TODO: AUTOGEN
 
         msg::MessageData response = {};
         InitMessageData(response, message.id, msg::DIRECTION_Response);

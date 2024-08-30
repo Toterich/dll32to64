@@ -50,7 +50,7 @@ struct VariableArray {
 };
 
 /* Defines a unique ID for each of the DLL functions and callbacks exposed by the wrapped DLL. */
-// TODO: Autogenerate this
+// TODO: AUTOGEN
 enum MsgId {
     MSGID_Invert = 0,
     MSGID_Concat = 1,
@@ -72,7 +72,7 @@ enum Direction
  *
  * Depending on the MessageId, the corresponding union member is the active one.
  */
-// TODO: Autogenerate this
+// TODO: AUTOGEN
 union StaticData
 {
     /*

@@ -14,7 +14,7 @@ namespace msg {
 #define SIZEOF_CASE_RESPONSE(MSG_NAME) \
     case MSGID_##MSG_NAME: return sizeof(StaticData::MSG_NAME##Response)
 
-// TODO: Autogenerate
+// TODO: AUTOGEN
 static int SizeOfStaticData(MsgId msgId, Direction direction)
 {
     if (direction == DIRECTION_Request)
