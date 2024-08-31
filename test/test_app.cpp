@@ -1,3 +1,5 @@
+#include <windows.h>
+
 #include <cassert>
 #include <cstring>
 #include <vector>
@@ -25,4 +27,6 @@ int main() {
     SetCallback(TestCallback);
     std::vector<int> expected{0, 1, 2, 3, 4};
     assert(cbVals == expected);
+
+    return 0;
 }

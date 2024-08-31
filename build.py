@@ -15,51 +15,56 @@ else:
 COMPILER_FLAGS = f'{OPT_FLAGS} -DDEBUG={bp.DEBUG} -Wall -Wextra -Werror -Wfatal-errors -static -funsigned-char'
 COMPILER_FLAGS = COMPILER_FLAGS.split()
 
-cwd = os.path.dirname(os.path.realpath(__file__))
-src = os.path.join(cwd, 'src')
+CWD = os.path.dirname(os.path.realpath(__file__))
+SRC = os.path.join(CWD, 'src')
 
-dll_path = os.path.join(cwd, bp.WRAPPED_DLL)
-dll_dir, dll_name = os.path.split(dll_path)
-dll_name = dll_name.split('.')[0]
+DLL_PATH = os.path.join(CWD, bp.WRAPPED_DLL)
+DLL_DIR, DLL_NAME = os.path.split(DLL_PATH)
+DLL_NAME = DLL_NAME.split('.')[0]
 
-dll_include_path = os.path.join(cwd, bp.WRAPPED_DLL_INCLUDE)
+DLL_INCLUDE_PATH = os.path.join(CWD, bp.WRAPPED_DLL_INCLUDE)
 
-build_dir = os.path.join(cwd, 'build')
-os.makedirs(build_dir, exist_ok=True)
+BUILD_DIR = os.path.join(CWD, 'build')
+os.makedirs(BUILD_DIR, exist_ok=True)
 
-print("Build bridge.dll")
-subprocess.run([bp.COMPILER64,
-    os.path.join(src, 'bridge', 'bridge.cpp'),
-    os.path.join(src, 'common', 'msg_protocol.cpp'),
-    os.path.join(src, 'common', 'socket.cpp'),
-    '-shared',
-    '-I' + dll_include_path,
-    '-I' + os.path.join(src),
-    '-I' + os.path.join(cwd, 'vendor', 'plog'),
-    '-lws2_32',
-    '-o' + os.path.join(build_dir, 'bridge.dll')] +
-    COMPILER_FLAGS
-)
+def main():
+    print("Build bridge.dll")
+    subprocess.run([bp.COMPILER64,
+        os.path.join(SRC, 'bridge', 'bridge.cpp'),
+        os.path.join(SRC, 'common', 'msg_protocol.cpp'),
+        os.path.join(SRC, 'common', 'socket.cpp'),
+        '-shared',
+        '-I' + DLL_INCLUDE_PATH,
+        '-I' + os.path.join(SRC),
+        '-I' + os.path.join(CWD, 'vendor', 'plog'),
+        '-lws2_32',
+        '-o' + os.path.join(BUILD_DIR, 'bridge.dll')] +
+        COMPILER_FLAGS
+    )
 
-print("Build wrapper.exe")
-subprocess.run([bp.COMPILER64,
-    os.path.join(src, 'wrapper', 'wrapper.cpp'),
-    os.path.join(src, 'common', 'msg_protocol.cpp'),
-    os.path.join(src, 'common', 'socket.cpp')] +
-    COMPILER_FLAGS +
-    ['-static', '-static-libgcc', '-static-libstdc++',
-    '-I' + dll_include_path,
-    '-I' + os.path.join(src),
-    '-I' + os.path.join(cwd, 'vendor', 'plog'),
-    '-lws2_32',
-    '-L' + dll_dir,
-    '-Wl,-Bdynamic',
-    '-l' + dll_name,
-    '-Wl,-Bstatic',
-    '-o' + os.path.join(build_dir, 'wrapper.exe')]
-)
+    print("Build wrapper.exe")
+    subprocess.run([bp.COMPILER64,
+        os.path.join(SRC, 'wrapper', 'wrapper.cpp'),
+        os.path.join(SRC, 'common', 'msg_protocol.cpp'),
+        os.path.join(SRC, 'common', 'socket.cpp')] +
+        COMPILER_FLAGS +
+        ['-static', '-static-libgcc', '-static-libstdc++',
+        '-I' + DLL_INCLUDE_PATH,
+        '-I' + os.path.join(SRC),
+        '-I' + os.path.join(CWD, 'vendor', 'plog'),
+        '-lws2_32',
+        '-L' + DLL_DIR,
+        '-Wl,-Bdynamic',
+        '-l' + DLL_NAME,
+        '-Wl,-Bstatic',
+        '-o' + os.path.join(BUILD_DIR, 'wrapper.exe')]
+    )
 
 
-print("Copy DLLs to build dir")
-for f in glob.glob(os.path.join(dll_dir, '*.dll')):
-    shutil.copy(f, build_dir)
+    print("Copy DLLs to build dir")
+    for f in glob.glob(os.path.join(DLL_DIR, '*.dll')):
+        shutil.copy(f, BUILD_DIR)
+
+
+if __name__ == '__main__':
+    main()
