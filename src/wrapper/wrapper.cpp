@@ -12,6 +12,9 @@
 #include <cassert>
 #include <mutex>
 
+// TODO: AUTOGEN
+#include "test_lib.h"
+
 namespace {
 
 // Socket to maintain request-response connection
@@ -183,6 +186,10 @@ int main()
 
                 std::memcpy(response.variableData, output, outputLength);
                 response.variableDataLength = outputLength;
+            } break;
+            case msg::MSGID_SetCallback:
+            {
+                SetCallback(&Callback);
             } break;
             default: assert(false);
         }

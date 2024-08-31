@@ -26,6 +26,11 @@ extern "C"
      * @return True if logging was started successfully.
      */
     bool EnableLogging(char const *path);
+
+    /**
+     * Shutdown the Wrapper executable.
+     */
+    void Shutdown();
 }
 
 namespace {
@@ -305,26 +310,6 @@ bool SendAndWaitForResponse(msg::MessageData const &message, msg::MessageData &r
     }
 }
 
-void Shutdown()
-{
-    PLOG_INFO << "Shutdown";
-
-    // This will initiate shutdown in wrapper.exe
-    if (requestSocket != INVALID_SOCKET) closesocket(requestSocket);
-
-    // Wait until wrapper has shut down (peer will close callback connection)
-    if (wrapperProcess != INVALID_HANDLE_VALUE)
-    {
-        WaitForSingleObject(wrapperProcess, INFINITE);
-        CloseHandle(wrapperProcess);
-    }
-
-    // Callback thread should have exited know and join immediately
-    if (callbackThread.joinable()) callbackThread.join();
-
-    WSACleanup();
-}
-
 template <typename T>
 std::string StringifyArray(const T* arr, size_t num)
 {
@@ -396,6 +381,27 @@ bool EnableLogging(char const *path)
     printf("dll32to64 Logfile: %s\n", fullPath);
     return true;
 }
+
+void Shutdown()
+{
+    PLOG_INFO << "Shutdown";
+
+    // This will initiate shutdown in wrapper.exe
+    if (requestSocket != INVALID_SOCKET) closesocket(requestSocket);
+
+    // Wait until wrapper has shut down (peer will close callback connection)
+    if (wrapperProcess != INVALID_HANDLE_VALUE)
+    {
+        WaitForSingleObject(wrapperProcess, INFINITE);
+        CloseHandle(wrapperProcess);
+    }
+
+    // Callback thread should have exited know and join immediately
+    if (callbackThread.joinable()) callbackThread.join();
+
+    WSACleanup();
+}
+
 
 // wrapped dll implementation
 // TODO: AUTOGEN

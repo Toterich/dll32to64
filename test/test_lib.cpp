@@ -19,17 +19,17 @@ void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
     memcpy(out+size1, s2, size2);
 }
 
-static void CallbackTask(TCallback cb, int n)
+static void CallbackTask(TCallback cb)
 {
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < 5; i++)
     {
         cb(i);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
-void SetCallback(TCallback proc, int n)
+void SetCallback(TCallback proc)
 {
-    std::thread cbThread(CallbackTask, proc, n);
+    std::thread cbThread(CallbackTask, proc);
     cbThread.join();
 }

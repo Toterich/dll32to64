@@ -24,6 +24,7 @@ static int SizeOfStaticData(MsgId msgId, Direction direction)
             SIZEOF_CASE_REQUEST(Callback);
             SIZEOF_CASE_REQUEST(Invert);
             SIZEOF_CASE_REQUEST(Concat);
+            SIZEOF_CASE_REQUEST(SetCallback);
         }
     }
     else if (direction == DIRECTION_Response)
@@ -33,6 +34,7 @@ static int SizeOfStaticData(MsgId msgId, Direction direction)
             SIZEOF_CASE_RESPONSE(Callback);
             SIZEOF_CASE_RESPONSE(Invert);
             SIZEOF_CASE_RESPONSE(Concat);
+            SIZEOF_CASE_RESPONSE(SetCallback);
         }
     }
 

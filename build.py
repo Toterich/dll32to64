@@ -25,6 +25,7 @@ dll_name = dll_name.split('.')[0]
 dll_include_path = os.path.join(cwd, bp.WRAPPED_DLL_INCLUDE)
 
 build_dir = os.path.join(cwd, 'build')
+os.makedirs(build_dir, exist_ok=True)
 
 print("Build bridge.dll")
 subprocess.run([bp.COMPILER64,
@@ -41,11 +42,12 @@ subprocess.run([bp.COMPILER64,
 )
 
 print("Build wrapper.exe")
-subprocess.run([bp.COMPILER32,
+subprocess.run([bp.COMPILER64,
     os.path.join(src, 'wrapper', 'wrapper.cpp'),
-    os.path.join(cwd, 'common', 'msg_protocol.cpp'),
-    os.path.join(cwd, 'common', 'socket.cpp'),
-    '-static', '-static-libgcc', '-static-libstdc++'
+    os.path.join(src, 'common', 'msg_protocol.cpp'),
+    os.path.join(src, 'common', 'socket.cpp')] +
+    COMPILER_FLAGS +
+    ['-static', '-static-libgcc', '-static-libstdc++',
     '-I' + dll_include_path,
     '-I' + os.path.join(src),
     '-I' + os.path.join(cwd, 'vendor', 'plog'),
@@ -54,9 +56,9 @@ subprocess.run([bp.COMPILER32,
     '-Wl,-Bdynamic',
     '-l' + dll_name,
     '-Wl,-Bstatic',
-    '-o' + os.path.join(build_dir, 'wrapper.exe')] +
-    COMPILER_FLAGS
+    '-o' + os.path.join(build_dir, 'wrapper.exe')]
 )
+
 
 print("Copy DLLs to build dir")
 for f in glob.glob(os.path.join(dll_dir, '*.dll')):
