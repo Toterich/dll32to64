@@ -28,7 +28,7 @@ BUILD_DIR = os.path.join(CWD, 'build')
 os.makedirs(BUILD_DIR, exist_ok=True)
 
 def main():
-    print("Build bridge.dll")
+    print("Building bridge.dll")
     subprocess.run([bp.COMPILER64,
         os.path.join(SRC, 'bridge', 'bridge.cpp'),
         os.path.join(SRC, 'common', 'msg_protocol.cpp'),
@@ -42,7 +42,7 @@ def main():
         COMPILER_FLAGS
     )
 
-    print("Build wrapper.exe")
+    print("Building wrapper.exe")
     subprocess.run([bp.COMPILER64,
         os.path.join(SRC, 'wrapper', 'wrapper.cpp'),
         os.path.join(SRC, 'common', 'msg_protocol.cpp'),
