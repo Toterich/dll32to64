@@ -1,8 +1,8 @@
-#include <windows.h>
-
 #include <cassert>
 #include <cstring>
 #include <vector>
+
+#include "dll32to64.h"
 
 #include "test_lib.h"
 
@@ -15,6 +15,8 @@ namespace {
 }
 
 int main() {
+    EnableLogging("./test.log");
+
     assert(!Invert(true));
     assert(Invert(false));
 

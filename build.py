@@ -1,16 +1,31 @@
 #!/bin/python
 import argparse
-import glob
 import os
-import shutil
 import subprocess
 
-import build_params as bp
+try:
+    import build_params as bp
+    DEFAULT_PARAMS = bp.__dict__
+except ModuleNotFoundError:
+    DEFAULT_PARAMS = {}
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 SRC = os.path.join(CWD, 'src')
 
-def main(comp64: str, comp32: str, dll: str, include: str, output: str, debug: bool):
+def main(comp64 = None, comp32 = None, dll = None, include = None, output = None, debug = None):
+    if comp64 is None:
+        comp64 = DEFAULT_PARAMS.get('COMPILER64')
+    if comp32 is None:
+        comp32 = DEFAULT_PARAMS.get('COMPILER32')
+    if dll is None:
+        dll = DEFAULT_PARAMS.get('WRAPPED_DLL')
+    if include is None:
+        include = DEFAULT_PARAMS.get('WRAPPED_DLL_INCLUDE')
+    if output is None:
+        output = DEFAULT_PARAMS.get('OUTPUT_DIR')
+    if debug is None:
+        debug = DEFAULT_PARAMS.get('DEBUG')
+
     # Shared compiler flags for both targets
     compiler_flags = f'-Wall -Wextra -Werror -Wfatal-errors -static -funsigned-char '
 
@@ -25,12 +40,13 @@ def main(comp64: str, comp32: str, dll: str, include: str, output: str, debug: b
     os.makedirs(output, exist_ok=True)
 
     print("Building bridge.dll")
-    subprocess.run([comp64,
+    subprocess.check_output([comp64,
         os.path.join(SRC, 'bridge', 'bridge.cpp'),
         os.path.join(SRC, 'common', 'msg_protocol.cpp'),
         os.path.join(SRC, 'common', 'socket.cpp'),
         '-shared',
         '-I' + include,
+        '-I' + os.path.join(CWD, 'include'),
         '-I' + os.path.join(SRC),
         '-I' + os.path.join(CWD, 'vendor', 'plog'),
         '-lws2_32',
@@ -42,7 +58,7 @@ def main(comp64: str, comp32: str, dll: str, include: str, output: str, debug: b
     dll_name = dll_name.rsplit('.', 1)[0]
 
     print("Building wrapper.exe")
-    subprocess.run([comp32,
+    subprocess.check_output([comp32,
         os.path.join(SRC, 'wrapper', 'wrapper.cpp'),
         os.path.join(SRC, 'common', 'msg_protocol.cpp'),
         os.path.join(SRC, 'common', 'socket.cpp'),
@@ -59,18 +75,14 @@ def main(comp64: str, comp32: str, dll: str, include: str, output: str, debug: b
         compiler_flags
     )
 
-    print("Copy DLLs to build dir")
-    for f in glob.glob(os.path.join(dll_dir, '*.dll')):
-        shutil.copy(f, output)
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Generate a bridge dLL and wrapper exe around a given library.")
-    parser.add_argument('--compiler64', type=str, default=bp.COMPILER64, help='64bit GCC compiler to be used.')
-    parser.add_argument('--compiler32', type=str, default=bp.COMPILER32, help='32bit GCC compiler to be used.')
-    parser.add_argument('--dll', type=str, default=bp.WRAPPED_DLL, help='Path to the library to be wrapped.')
-    parser.add_argument('--include', type=str, default=bp.WRAPPED_DLL_INCLUDE, help="Path to the header(s) declaring the DLL's exported symbols.")
-    parser.add_argument('--output', type=str, default=bp.OUTPUT_DIR, help='Directory where the generated binaries should be stored.')
+    parser.add_argument('--compiler64', type=str, default=None, help='64bit GCC compiler to be used.')
+    parser.add_argument('--compiler32', type=str, default=None, help='32bit GCC compiler to be used.')
+    parser.add_argument('--dll', type=str, default=None, help='Path to the library to be wrapped.')
+    parser.add_argument('--include', type=str, default=None, help="Path to the header(s) declaring the DLL's exported symbols.")
+    parser.add_argument('--output', type=str, default=None, help='Directory where the generated binaries should be stored.')
     parser.add_argument('--debug', action='store_true', help='Build debug binaries.')
     args = parser.parse_args()
 
