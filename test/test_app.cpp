@@ -15,7 +15,7 @@ namespace {
 }
 
 int main() {
-    EnableLogging("./test.log");
+    Dll32To64_EnableLogging("C:/Users/Toto/");
 
     assert(!Invert(true));
     assert(Invert(false));

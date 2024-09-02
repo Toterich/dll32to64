@@ -179,6 +179,7 @@ int main()
                 char output[msg::MSG_MAX_SIZE];
                 Concat(s1, size1, s2, size2, output);
 
+                // FIXME: Doesn't work if first string has trailing /0
                 int const outputLength = strnlen(output, msg::MSG_MAX_SIZE - 1) + 1;
 
                 response.staticData.ConcatResponse.out.byte_offset = 0;

@@ -170,13 +170,11 @@ bool EnsureWrapperConnection()
     {
         PLOG_INFO << "Starting Wrapper";
 
-        // First, get full path to directory where the DLL lies
+        // First, get full path to directory where this DLL lies
         // See https://stackoverflow.com/a/6924332
         HMODULE hm = NULL;
-        // Needs the name of one exported function of the DLL
-        // TODO: AUTOGEN
         if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                               (LPCSTR)&Invert, &hm))
+                               (LPCSTR)&Dll32To64_EnableLogging, &hm))
         {
             int const lastError = GetLastError();
             PLOG_ERROR << "GetModuleHandleEx() Error: " << lastError;
@@ -196,7 +194,7 @@ bool EnsureWrapperConnection()
 
         // Append exe name to path
         // TODO: Respect different filename depending on wrapping direction
-        std::strcpy(&path[lastSlashPos + 1], "dll32to64_wrapper.exe");
+        std::strcpy(&path[lastSlashPos + 1], "wrapper.exe");
 
         PLOG_DEBUG << "Running " << path;
 
@@ -328,7 +326,7 @@ std::string StringifyArrayOfStrings(const char (*arr)[N], size_t num)
 
 } // end anonymous namespace
 
-bool EnableLogging(char const *path)
+bool Dll32To64_EnableLogging(char const *path)
 {
     if (path == nullptr)
     {
@@ -364,7 +362,7 @@ bool EnableLogging(char const *path)
     return true;
 }
 
-void Shutdown()
+void Dll32To64_Shutdown()
 {
     PLOG_INFO << "Shutdown";
 
@@ -404,23 +402,21 @@ void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
     if (!EnsureWrapperConnection()) return;
 
     msg::MessageData message = {};
-    msg::InitMessageData(message, msg::MSGID_Invert, msg::DIRECTION_Request);
+    msg::InitMessageData(message, msg::MSGID_Concat, msg::DIRECTION_Request);
     message.staticData.Concat.s1.byte_offset = 0;
     message.staticData.Concat.s1.byte_length = size1;
     message.staticData.Concat.s2.byte_offset = size1;
     message.staticData.Concat.s2.byte_length = size2;
 
-    msg::MessageData response = {};
-    if (!SendAndWaitForResponse(message, response)) return;
-
+    message.variableDataLength = size1 + size2;
     if (message.variableDataLength > sizeof(message.variableData))
     {
         PLOG_ERROR << "Data length exceeded (" << message.variableDataLength << ">" << sizeof(message.variableData) << ")";
         return;
     }
 
-    std::memcpy(message.variableData, s1, size1);
-    std::memcpy(message.variableData + size1, s2, size2);
+    memcpy(&message.variableData[0], s1, size1);
+    memcpy(&message.variableData[size1], s2, size2);
 
     msg::MessageData responseMessage = {};
     if (!SendAndWaitForResponse(message, responseMessage)) return;
@@ -446,7 +442,7 @@ void SetCallback(TCallback cb)
     callback = cb;
 
     msg::MessageData message = {};
-    msg::InitMessageData(message, msg::MSGID_Callback, msg::DIRECTION_Request);
+    msg::InitMessageData(message, msg::MSGID_SetCallback, msg::DIRECTION_Request);
 
     msg::MessageData response = {};
     if (!SendAndWaitForResponse(message, response)) return;
