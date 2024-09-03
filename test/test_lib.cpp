@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 #include <chrono>
 #include <thread>
@@ -14,9 +15,30 @@ bool Invert(bool input) {
     return !input;
 }
 
-void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
-    memcpy(out, s1, size1);
-    memcpy(out+size1, s2, size2);
+void Interleave(char const* s1, int size1, char const* s2, int size2, char* out) {
+    int sMin = std::min(size1, size2);
+    int outIdx = 0;
+    for (int i = 0; i < sMin; i++) {
+        out[outIdx] = s1[i];
+        out[outIdx+1] = s2[i];
+        outIdx += 2;
+    }
+
+    if (size1 == size2) {
+        return;
+    }
+
+    char const* rest;
+    int sMax;
+    if (s1 < s2) {
+        rest = &s2[sMin];
+        sMax = size2;
+    }
+    else {
+        rest = &s1[sMin];
+        sMax = size1;
+    }
+    memcpy(out+2*sMin, rest, sMax - sMin);
 }
 
 static void CallbackTask(TCallback cb)

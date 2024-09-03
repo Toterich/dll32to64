@@ -144,6 +144,11 @@ int main()
         int recvBytes;
         if (!sock::Receive(requestSocket, incoming, sizeof(incoming), recvBytes))
         {
+            if (recvBytes == 0) {
+                printf("WRAPPER: Shutdown because other end hung up.\n");
+                return Shutdown(0);
+            }
+
             printf("WRAPPER: Receive() Error: %d\n", recvBytes);
             return Shutdown(recvBytes);
         }
@@ -170,20 +175,20 @@ int main()
             {
                 response.staticData.InvertResponse = Invert(message.staticData.Invert.input);
             } break;
-            case msg::MSGID_Concat:
+            case msg::MSGID_Interleave:
             {
-                char* const s1 = &message.variableData[message.staticData.Concat.s1.byte_offset];
-                int size1 = message.staticData.Concat.s1.byte_length;
-                char* const s2 = &message.variableData[message.staticData.Concat.s2.byte_offset];
-                int size2 = message.staticData.Concat.s2.byte_length;
+                char* const s1 = &message.variableData[message.staticData.Interleave.s1.byte_offset];
+                int size1 = message.staticData.Interleave.s1.byte_length;
+                char* const s2 = &message.variableData[message.staticData.Interleave.s2.byte_offset];
+                int size2 = message.staticData.Interleave.s2.byte_length;
                 char output[msg::MSG_MAX_SIZE];
-                Concat(s1, size1, s2, size2, output);
+                Interleave(s1, size1, s2, size2, output);
 
                 // FIXME: Doesn't work if first string has trailing /0
                 int const outputLength = strnlen(output, msg::MSG_MAX_SIZE - 1) + 1;
 
-                response.staticData.ConcatResponse.out.byte_offset = 0;
-                response.staticData.ConcatResponse.out.byte_length = outputLength;
+                response.staticData.InterleaveResponse.out.byte_offset = 0;
+                response.staticData.InterleaveResponse.out.byte_length = outputLength;
 
                 std::memcpy(response.variableData, output, outputLength);
                 response.variableDataLength = outputLength;

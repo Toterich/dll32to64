@@ -398,15 +398,15 @@ bool Invert(bool input) {
     return response.staticData.InvertResponse;
 }
 
-void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
+void Interleave(char const* s1, int size1, char const* s2, int size2, char* out) {
     if (!EnsureWrapperConnection()) return;
 
     msg::MessageData message = {};
-    msg::InitMessageData(message, msg::MSGID_Concat, msg::DIRECTION_Request);
-    message.staticData.Concat.s1.byte_offset = 0;
-    message.staticData.Concat.s1.byte_length = size1;
-    message.staticData.Concat.s2.byte_offset = size1;
-    message.staticData.Concat.s2.byte_length = size2;
+    msg::InitMessageData(message, msg::MSGID_Interleave, msg::DIRECTION_Request);
+    message.staticData.Interleave.s1.byte_offset = 0;
+    message.staticData.Interleave.s1.byte_length = size1;
+    message.staticData.Interleave.s2.byte_offset = size1;
+    message.staticData.Interleave.s2.byte_length = size2;
 
     message.variableDataLength = size1 + size2;
     if (message.variableDataLength > sizeof(message.variableData))
@@ -421,7 +421,7 @@ void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
     msg::MessageData responseMessage = {};
     if (!SendAndWaitForResponse(message, responseMessage)) return;
 
-    size_t const responseVdSize = responseMessage.staticData.ConcatResponse.out.byte_length;
+    size_t const responseVdSize = responseMessage.staticData.InterleaveResponse.out.byte_length;
     if (responseVdSize > sizeof(responseMessage.variableData))
     {
         PLOG_ERROR << "Response data length exceeded (" << responseVdSize << ">" << sizeof(responseMessage.variableData) << ")";
@@ -429,7 +429,7 @@ void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
     }
 
     std::memcpy(out,
-                &responseMessage.variableData[responseMessage.staticData.ConcatResponse.out.byte_offset],
+                &responseMessage.variableData[responseMessage.staticData.InterleaveResponse.out.byte_offset],
                 responseVdSize);
 }
 

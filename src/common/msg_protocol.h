@@ -53,7 +53,7 @@ struct VariableArray {
 // TODO: AUTOGEN
 enum MsgId {
     MSGID_Invert = 0,
-    MSGID_Concat,
+    MSGID_Interleave,
     MSGID_SetCallback,
     MSGID_Callback,
     MSGID_LAST = MSGID_Callback,
@@ -95,10 +95,10 @@ union StaticData
     struct {
         VariableArray s1;
         VariableArray s2;
-    } Concat;
+    } Interleave;
     struct {
         VariableArray out;
-    } ConcatResponse;
+    } InterleaveResponse;
 
     struct {} SetCallback;
     struct {} SetCallbackResponse;
