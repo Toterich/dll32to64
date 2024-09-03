@@ -15,7 +15,7 @@ I am planning to add a code generator that creates the c++ code to wrap an arbit
 
 ## Functional Overview
 
-Building this project created two binaries:
+Building this project creates two binaries:
 
 * A Bridge DLL, which exports the same symbol names as the DLL to be wrapped. This is intended to be used as a drop-in replacement for the wrapped DLL.
 * A Wrapper executable, which links against the wrapped DLL. This communicates with the Bridge DLL via a TCP socket connection.
