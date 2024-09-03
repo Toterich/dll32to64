@@ -14,7 +14,7 @@ namespace msg {
 #define SIZEOF_CASE_RESPONSE(MSG_NAME) \
     case MSGID_##MSG_NAME: return sizeof(StaticData::MSG_NAME##Response)
 
-// TODO: Autogenerate
+// TODO: AUTOGEN
 static int SizeOfStaticData(MsgId msgId, Direction direction)
 {
     if (direction == DIRECTION_Request)
@@ -23,7 +23,8 @@ static int SizeOfStaticData(MsgId msgId, Direction direction)
         {
             SIZEOF_CASE_REQUEST(Callback);
             SIZEOF_CASE_REQUEST(Invert);
-            SIZEOF_CASE_REQUEST(Concat);
+            SIZEOF_CASE_REQUEST(Interleave);
+            SIZEOF_CASE_REQUEST(SetCallback);
         }
     }
     else if (direction == DIRECTION_Response)
@@ -32,7 +33,8 @@ static int SizeOfStaticData(MsgId msgId, Direction direction)
         {
             SIZEOF_CASE_RESPONSE(Callback);
             SIZEOF_CASE_RESPONSE(Invert);
-            SIZEOF_CASE_RESPONSE(Concat);
+            SIZEOF_CASE_RESPONSE(Interleave);
+            SIZEOF_CASE_RESPONSE(SetCallback);
         }
     }
 

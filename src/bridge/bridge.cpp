@@ -10,6 +10,11 @@
 #include <string>
 #include <sstream>
 
+#include "dll32to64.h"
+
+// TODO: AUTOGEN
+#include "test_lib.h"
+
 namespace {
 
 bool winSockStartup = false;
@@ -22,9 +27,8 @@ SOCKET callbackSocket = INVALID_SOCKET;
 HANDLE wrapperProcess = INVALID_HANDLE_VALUE;
 
 // User defined callback functions
+// TODO: AUTOGEN
 TCallback callback = NULL;
-TScanCallback scanCallback = NULL;
-TRestartLineCallback restartLineCallback = NULL;
 
 // Thread executing CallbackTask
 std::thread callbackThread;
@@ -166,11 +170,11 @@ bool EnsureWrapperConnection()
     {
         PLOG_INFO << "Starting Wrapper";
 
-        // First, get full path to directory where the DLL lies
+        // First, get full path to directory where this DLL lies
         // See https://stackoverflow.com/a/6924332
         HMODULE hm = NULL;
         if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                               (LPCSTR)&Initialization, &hm))
+                               (LPCSTR)&Dll32To64_EnableLogging, &hm))
         {
             int const lastError = GetLastError();
             PLOG_ERROR << "GetModuleHandleEx() Error: " << lastError;
@@ -190,7 +194,7 @@ bool EnsureWrapperConnection()
 
         // Append exe name to path
         // TODO: Respect different filename depending on wrapping direction
-        std::strcpy(&path[lastSlashPos + 1], "dll32to64_wrapper.exe");
+        std::strcpy(&path[lastSlashPos + 1], "wrapper.exe");
 
         PLOG_DEBUG << "Running " << path;
 
@@ -286,26 +290,6 @@ bool SendAndWaitForResponse(msg::MessageData const &message, msg::MessageData &r
     }
 }
 
-void Shutdown()
-{
-    PLOG_INFO << "Shutdown";
-
-    // This will initiate shutdown in wrapper.exe
-    if (requestSocket != INVALID_SOCKET) closesocket(requestSocket);
-
-    // Wait until wrapper has shut down (peer will close callback connection)
-    if (wrapperProcess != INVALID_HANDLE_VALUE)
-    {
-        WaitForSingleObject(wrapperProcess, INFINITE);
-        CloseHandle(wrapperProcess);
-    }
-
-    // Callback thread should have exited know and join immediately
-    if (callbackThread.joinable()) callbackThread.join();
-
-    WSACleanup();
-}
-
 template <typename T>
 std::string StringifyArray(const T* arr, size_t num)
 {
@@ -342,10 +326,8 @@ std::string StringifyArrayOfStrings(const char (*arr)[N], size_t num)
 
 } // end anonymous namespace
 
-bool EnableLogging(char const *path)
+bool Dll32To64_EnableLogging(char const *path)
 {
-    // TODO: Do this once on load
-
     if (path == nullptr)
     {
         return false;
@@ -380,8 +362,29 @@ bool EnableLogging(char const *path)
     return true;
 }
 
+void Dll32To64_Shutdown()
+{
+    PLOG_INFO << "Shutdown";
+
+    // This will initiate shutdown in wrapper.exe
+    if (requestSocket != INVALID_SOCKET) closesocket(requestSocket);
+
+    // Wait until wrapper has shut down (peer will close callback connection)
+    if (wrapperProcess != INVALID_HANDLE_VALUE)
+    {
+        WaitForSingleObject(wrapperProcess, INFINITE);
+        CloseHandle(wrapperProcess);
+    }
+
+    // Callback thread should have exited know and join immediately
+    if (callbackThread.joinable()) callbackThread.join();
+
+    WSACleanup();
+}
+
+
 // wrapped dll implementation
-// TODO: Autogenerate
+// TODO: AUTOGEN
 
 bool Invert(bool input) {
     if (!EnsureWrapperConnection()) return false;
@@ -395,32 +398,30 @@ bool Invert(bool input) {
     return response.staticData.InvertResponse;
 }
 
-void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
+void Interleave(char const* s1, int size1, char const* s2, int size2, char* out) {
     if (!EnsureWrapperConnection()) return;
 
     msg::MessageData message = {};
-    msg::InitMessageData(message, msg::MSGID_Invert, msg::DIRECTION_Request);
-    message.staticData.Concat.s1.byte_offset = 0;
-    message.staticData.Concat.s1.byte_length = size1;
-    message.staticData.Concat.s2.byte_offset = size1;
-    message.staticData.Concat.s2.byte_length = size2;
+    msg::InitMessageData(message, msg::MSGID_Interleave, msg::DIRECTION_Request);
+    message.staticData.Interleave.s1.byte_offset = 0;
+    message.staticData.Interleave.s1.byte_length = size1;
+    message.staticData.Interleave.s2.byte_offset = size1;
+    message.staticData.Interleave.s2.byte_length = size2;
 
-    msg::MessageData response = {};
-    if (!SendAndWaitForResponse(message, response)) return;
-
+    message.variableDataLength = size1 + size2;
     if (message.variableDataLength > sizeof(message.variableData))
     {
         PLOG_ERROR << "Data length exceeded (" << message.variableDataLength << ">" << sizeof(message.variableData) << ")";
         return;
     }
 
-    std::memcpy(message.variableData, input, inputLength);
-    message.variableData[inputLength - 1] = '\0';  // Ensure 0-terminated string
+    memcpy(&message.variableData[0], s1, size1);
+    memcpy(&message.variableData[size1], s2, size2);
 
     msg::MessageData responseMessage = {};
     if (!SendAndWaitForResponse(message, responseMessage)) return;
 
-    size_t const responseVdSize = responseMessage.staticData.ConcatResponse.out.byte_length;
+    size_t const responseVdSize = responseMessage.staticData.InterleaveResponse.out.byte_length;
     if (responseVdSize > sizeof(responseMessage.variableData))
     {
         PLOG_ERROR << "Response data length exceeded (" << responseVdSize << ">" << sizeof(responseMessage.variableData) << ")";
@@ -428,23 +429,21 @@ void Concat(char const* s1, int size1, char const* s2, int size2, char* out) {
     }
 
     std::memcpy(out,
-                &responseMessage.variableData[responseMessage.staticData.ConcatResponse.out.byte_offset],
+                &responseMessage.variableData[responseMessage.staticData.InterleaveResponse.out.byte_offset],
                 responseVdSize);
 }
 
 void SetCallback(TCallback cb)
 {
-    if (!EnsureWrapperConnection()) return false;
+    if (!EnsureWrapperConnection()) return;
 
     // Store callback pointer before sending message, in case the first callback arrives before SetCallback's response
     // arrives
-    callback = proc;
+    callback = cb;
 
     msg::MessageData message = {};
-    msg::InitMessageData(message, MSGID_Callback, msg::DIRECTION_Request);
+    msg::InitMessageData(message, msg::MSGID_SetCallback, msg::DIRECTION_Request);
 
     msg::MessageData response = {};
     if (!SendAndWaitForResponse(message, response)) return;
-
-    return true;
 }
