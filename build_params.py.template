@@ -1,14 +1,14 @@
-import os
+# Paths to Mingw 64bit and 32bit compiler
+COMPILER64 = 'C:/msys64/mingw64/bin/g++.exe'
+COMPILER32 = 'C:/msys64/mingw32/bin/g++.exe'
 
-_cwd = os.path.dirname(os.path.realpath(__file__))
+# Path to library to be wrapped
+WRAPPED_DLL = './test/test_lib.dll'
+# Path to the headers exporting the wrapped DLL's symbols
+WRAPPED_DLL_INCLUDE = './test/'
 
-# Modify this if your Mingw compiler is located somewhere else
-COMPILER64 = 'C:/mingw/mingw64/bin/g++.exe'
-COMPILER32 = 'C:/mingw/mingw32/bin/g++.exe'
+# Path to output directory
+OUTPUT_DIR = './build/'
 
-# Location of build artifacts
-BUILD_DIR = os.path.join(_cwd, 'build')
-BUILD_DIR_TEST = os.path.join(_cwd, 'test', 'build')
-
-# Set to 1 to build debug binaries
-DEBUG = 0
+# Set to True to build debug binaries
+DEBUG = True
