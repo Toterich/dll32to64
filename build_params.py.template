@@ -6,6 +6,8 @@ COMPILER32 = 'C:/msys64/mingw32/bin/g++.exe'
 WRAPPED_DLL = './test/test_lib.dll'
 # Path to the headers exporting the wrapped DLL's symbols
 WRAPPED_DLL_INCLUDE = './test/'
+# Name of the header declaring the DLL's interface
+WRAPPED_DLL_HEADER = 'test_lib.h'
 
 # Path to output directory
 OUTPUT_DIR = './build/'

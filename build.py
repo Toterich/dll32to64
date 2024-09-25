@@ -1,5 +1,6 @@
 #!/bin/python
 import argparse
+import re
 import os
 import subprocess
 
@@ -12,7 +13,10 @@ except ModuleNotFoundError:
 CWD = os.path.dirname(os.path.realpath(__file__))
 SRC = os.path.join(CWD, 'src')
 
-def main(comp64 = None, comp32 = None, dll = None, include = None, output = None, debug = None):
+# Group 1: Gen Tag
+GEN_TAG = re.compile(r"^\s*// \[\[GEN\]\]\s*(.+)$")
+
+def main(comp64 = None, comp32 = None, dll = None, include = None, header = None, output = None, debug = None):
     if comp64 is None:
         comp64 = DEFAULT_PARAMS.get('COMPILER64')
     if comp32 is None:
@@ -21,10 +25,35 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, output = None
         dll = DEFAULT_PARAMS.get('WRAPPED_DLL')
     if include is None:
         include = DEFAULT_PARAMS.get('WRAPPED_DLL_INCLUDE')
+    if header is None:
+        header = DEFAULT_PARAMS.get('WRAPPED_DLL_HEADER')
     if output is None:
         output = DEFAULT_PARAMS.get('OUTPUT_DIR')
     if debug is None:
         debug = DEFAULT_PARAMS.get('DEBUG')
+
+    os.makedirs(output, exist_ok=True)
+    
+    print("Generate bridge.cpp")
+    bridge_template = os.path.join(SRC, 'bridge', 'bridge.cpp.template')
+    bridge_cpp = os.path.join(output, 'bridge.cpp')
+    with open(bridge_cpp, 'w') as out_f, open(bridge_template, 'r') as in_f:
+        print_out = lambda s: print(s, file=out_f, end='')
+        for l in in_f:
+            m = GEN_TAG.match(l)
+            if not m:
+                print_out(l)
+                continue
+
+            gen_tag = m.group(1)
+            if gen_tag == 'BRIDGE_INCLUDE':
+                print_out(f'#include "{header}"\n')
+            elif gen_tag == 'BRIDGE_CALLBACK_DECL':
+                pass
+            elif gen_tag == 'BRIDGE_IMPL':
+                pass
+            else:
+                assert False
 
     # Shared compiler flags for both targets
     compiler_flags = f'-Wall -Wextra -Werror -Wfatal-errors -static -funsigned-char '
@@ -37,11 +66,9 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, output = None
     compiler_flags += debug_flags
     compiler_flags = compiler_flags.split()
 
-    os.makedirs(output, exist_ok=True)
-
     print("Building bridge.dll")
     subprocess.check_output([comp64,
-        os.path.join(SRC, 'bridge', 'bridge.cpp'),
+        os.path.join(output, 'bridge.cpp'),
         os.path.join(SRC, 'common', 'msg_protocol.cpp'),
         os.path.join(SRC, 'common', 'socket.cpp'),
         '-shared',

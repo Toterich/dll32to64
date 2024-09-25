@@ -12,8 +12,7 @@
 
 #include "dll32to64.h"
 
-// TODO: AUTOGEN
-#include "test_lib.h"
+// [[GEN]] BRIDGE_INCLUDE
 
 namespace {
 
@@ -27,7 +26,7 @@ SOCKET callbackSocket = INVALID_SOCKET;
 HANDLE wrapperProcess = INVALID_HANDLE_VALUE;
 
 // User defined callback functions
-// TODO: AUTOGEN
+// [[GEN]] BRIDGE_CALLBACK_DECL
 TCallback callback = NULL;
 
 // Thread executing CallbackTask
@@ -384,7 +383,7 @@ void Dll32To64_Shutdown()
 
 
 // wrapped dll implementation
-// TODO: AUTOGEN
+// [[GEN]] BRIDGE_IMPL
 
 bool Invert(bool input) {
     if (!EnsureWrapperConnection()) return false;
