@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstring>
+#include <cstdio>
 #include <vector>
 
 #include "dll32to64.h"
@@ -14,8 +15,10 @@ namespace {
     }
 }
 
-int main() {
-    Dll32To64_EnableLogging("C:/Users/Toto/");
+int main(int argc, char* argv[]) {
+    if (argc >= 2) {
+        Dll32To64_EnableLogging(argv[1]);
+    }
 
     assert(!Invert(true));
     assert(Invert(false));
@@ -33,5 +36,6 @@ int main() {
     assert(cbVals == expected);
 
     Dll32To64_Shutdown();
+    printf("All tests passed successfully.\n");
     return 0;
 }
