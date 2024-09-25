@@ -3,6 +3,9 @@ import argparse
 import re
 import os
 import subprocess
+import json
+
+from cpp_gen import CppGen
 
 try:
     import build_params as bp
@@ -16,7 +19,7 @@ SRC = os.path.join(CWD, 'src')
 # Group 1: Gen Tag
 GEN_TAG = re.compile(r"^\s*// \[\[GEN\]\]\s*(.+)$")
 
-def main(comp64 = None, comp32 = None, dll = None, include = None, header = None, output = None, debug = None):
+def main(comp64 = None, comp32 = None, dll = None, include = None, output = None, extra_cfg = None, debug = None):
     if comp64 is None:
         comp64 = DEFAULT_PARAMS.get('COMPILER64')
     if comp32 is None:
@@ -25,12 +28,15 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, header = None
         dll = DEFAULT_PARAMS.get('WRAPPED_DLL')
     if include is None:
         include = DEFAULT_PARAMS.get('WRAPPED_DLL_INCLUDE')
-    if header is None:
-        header = DEFAULT_PARAMS.get('WRAPPED_DLL_HEADER')
     if output is None:
         output = DEFAULT_PARAMS.get('OUTPUT_DIR')
+    if extra_cfg is None:
+        extra_cfg = DEFAULT_PARAMS.get("CONFIG")
     if debug is None:
         debug = DEFAULT_PARAMS.get('DEBUG')
+
+    extra_cfg = os.path.join(CWD, extra_cfg)
+    generator = CppGen(extra_cfg)
 
     os.makedirs(output, exist_ok=True)
     
@@ -40,20 +46,14 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, header = None
     with open(bridge_cpp, 'w') as out_f, open(bridge_template, 'r') as in_f:
         print_out = lambda s: print(s, file=out_f, end='')
         for l in in_f:
+            print_out(l)
+
             m = GEN_TAG.match(l)
             if not m:
-                print_out(l)
                 continue
 
             gen_tag = m.group(1)
-            if gen_tag == 'BRIDGE_INCLUDE':
-                print_out(f'#include "{header}"\n')
-            elif gen_tag == 'BRIDGE_CALLBACK_DECL':
-                pass
-            elif gen_tag == 'BRIDGE_IMPL':
-                pass
-            else:
-                assert False
+            print_out(generator.code_gen(gen_tag))
 
     # Shared compiler flags for both targets
     compiler_flags = f'-Wall -Wextra -Werror -Wfatal-errors -static -funsigned-char '

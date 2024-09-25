@@ -27,7 +27,6 @@ HANDLE wrapperProcess = INVALID_HANDLE_VALUE;
 
 // User defined callback functions
 // [[GEN]] BRIDGE_CALLBACK_DECL
-TCallback callback = NULL;
 
 // Thread executing CallbackTask
 std::thread callbackThread;
@@ -99,9 +98,10 @@ void CallbackTask()
         }
 
         PLOG_DEBUG << "Callback " << message.id;
-
+        
         switch (message.id)
         {
+            // [[GEN]] BRIDGE_CALLBACK_IMPL
             case msg::MSGID_Callback:
             {
                 if (callback != NULL)

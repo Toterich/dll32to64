@@ -1,0 +1,49 @@
+{
+  "header_name": "test_lib.h",
+  "callbacks": [
+    "TCallback"
+  ],
+  "functions": [
+    {
+      "name": "Interleave",
+      "params": [
+        {
+          "name": "s1",
+          "type": "array",
+          "size":
+            {
+              "type": "param",
+              "name": "size1"
+            }
+        },
+        {
+          "name": "s2",
+          "type": "array",
+          "size":
+            {
+              "type": "param",
+              "name": "size2"
+            }
+        },
+        {
+          "name": "out",
+          "type": "array",
+          "size":
+            {
+              "type": "zero_terminated"
+            },
+          "output": true
+        }
+      ]
+    },
+    {
+      "name": "SetCallback",
+      "params": [
+        {
+          "name": "cb",
+          "type": "callback"
+        }
+      ]
+    }
+  ]
+}
