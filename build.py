@@ -1,9 +1,9 @@
 #!/bin/python
 import argparse
+import json
 import re
 import os
 import subprocess
-import json
 
 from cpp_gen import CppGen
 
@@ -19,7 +19,7 @@ SRC = os.path.join(CWD, 'src')
 # Group 1: Gen Tag
 GEN_TAG = re.compile(r"^\s*// \[\[GEN\]\]\s*(.+)$")
 
-def main(comp64 = None, comp32 = None, dll = None, include = None, output = None, extra_cfg = None, debug = None):
+def main(comp64 = None, comp32 = None, dll = None, include = None, output = None, cfg_path = None, debug = None):
     if comp64 is None:
         comp64 = DEFAULT_PARAMS.get('COMPILER64')
     if comp32 is None:
@@ -30,13 +30,14 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, output = None
         include = DEFAULT_PARAMS.get('WRAPPED_DLL_INCLUDE')
     if output is None:
         output = DEFAULT_PARAMS.get('OUTPUT_DIR')
-    if extra_cfg is None:
-        extra_cfg = DEFAULT_PARAMS.get("CONFIG")
+    if cfg_path is None:
+        cfg_path = DEFAULT_PARAMS.get("CONFIG")
     if debug is None:
         debug = DEFAULT_PARAMS.get('DEBUG')
 
-    extra_cfg = os.path.join(CWD, extra_cfg)
-    generator = CppGen(extra_cfg)
+    if not os.path.isabs(cfg_path):
+        cfg_path = os.path.join(CWD, cfg_path)
+    generator = CppGen(cfg_path)
 
     os.makedirs(output, exist_ok=True)
     
@@ -75,7 +76,7 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, output = None
         '-I' + include,
         '-I' + os.path.join(CWD, 'include'),
         '-I' + os.path.join(SRC),
-        '-I' + os.path.join(CWD, 'vendor', 'plog'),
+        '-I' + os.path.join(CWD, 'vendor', 'c', 'plog'),
         '-lws2_32',
         '-o' + os.path.join(output, 'bridge.dll')] +
         compiler_flags 
@@ -92,7 +93,7 @@ def main(comp64 = None, comp32 = None, dll = None, include = None, output = None
         '-static', '-static-libgcc', '-static-libstdc++',
         '-I' + include,
         '-I' + os.path.join(SRC),
-        '-I' + os.path.join(CWD, 'vendor', 'plog'),
+        '-I' + os.path.join(CWD, 'vendor', 'c','plog'),
         '-lws2_32',
         '-L' + dll_dir,
         '-Wl,-Bdynamic',

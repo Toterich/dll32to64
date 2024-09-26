@@ -1,49 +1,83 @@
 {
-  "header_name": "test_lib.h",
-  "callbacks": [
-    "TCallback"
-  ],
-  "functions": [
-    {
-      "name": "Interleave",
+  "header": "./test_lib.h",
+  "types": {
+    "TCallback" : {
+      "variant": "function_ptr",
+      "params": [
+        {
+          "name": "val",
+          "type": "int"
+        }
+      ],
+      "ret_type": "void"
+    },
+    "AStruct" : {
+      "variant": "struct",
+      "members": {
+        "c" : {
+          "type": "char"
+        },
+        "f" : {
+          "type": "float"
+        }
+      }
+    }
+  },
+  "functions": {
+    "Invert" : {
+      "params": [
+        {
+          "name" : "input",
+          "type": "bool"
+        }
+      ],
+      "ret_type" : "bool"
+    },
+    "Interleave" : {
       "params": [
         {
           "name": "s1",
-          "type": "array",
-          "size":
-            {
-              "type": "param",
-              "name": "size1"
-            }
+          "type": "char const*",
+          "array_size": {
+              "source": "param",
+              "value": "size1"
+          }
+        },
+        {
+          "name": "size1",
+          "type": "int"
         },
         {
           "name": "s2",
-          "type": "array",
-          "size":
-            {
-              "type": "param",
-              "name": "size2"
-            }
+          "type": "char const*",
+          "array_size": {
+              "source": "param",
+              "value": "size2"
+          }
+        },
+        {
+          "name": "size2",
+          "type": "int"
         },
         {
           "name": "out",
-          "type": "array",
-          "size":
-            {
-              "type": "zero_terminated"
-            },
+          "type": "char*",
+          "array_size": {
+              "source": "zero_terminated"
+          },
           "output": true
         }
-      ]
+      ],
+      "ret_type": "void"
     },
-    {
-      "name": "SetCallback",
+    "SetCallback": {
       "params": [
         {
           "name": "cb",
-          "type": "callback"
+          "type": "TCallback"
         }
-      ]
+      ],
+      "ret_type": "void"
     }
-  ]
+  }
 }

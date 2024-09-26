@@ -48,13 +48,16 @@ The following diagram illustrates the data flow from a 64bit client application 
 
 ## Dependencies
 
-This project uses the `MinGW` compiler toolchain. Additionally, `Python3` is required to execute the build script.
+This project uses the `MinGW` compiler toolchain. Additionally, `Python3` is required to execute the build script. All additional dependencies are included in this project in the `vendor` directory.
 
 The build has been successfully tested on the [MSYS2](https://www.msys2.org/) environment. Once installed, open an Msys terminal and run the following
 
 ```bash
 pacman -Syu
-pacman -Sy mingw-w64-x86_64-toolchain mingw-w64-i686-toolchain python3
+pacman -Sy \
+mingw-w64-x86_64-toolchain \
+mingw-w64-i686-toolchain \
+python3
 ```
 
 ## Config and Build

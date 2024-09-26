@@ -1,11 +1,12 @@
 import json
+import os
+
 
 class CppGen:
-    def __init__(self, cfg: str):
-        with open(cfg, 'r') as f:
+    def __init__(self, cfg_path: str):
+        with open(cfg_path, 'r') as f:
             self._cfg = json.load(f)
-        
-        # TODO: This will be determined from the header itself later on
+
         self._callbacks = {}
         for cb in self._cfg['callbacks']:
             self._callbacks[cb] = cb + "_inst"
@@ -14,7 +15,8 @@ class CppGen:
         output = ''
 
         if gen_tag == 'BRIDGE_INCLUDE':
-            output += f'#include "{self._cfg["header_name"]}"\n'
+            header_name = os.path.basename(self._cfg["header"])
+            output += f'#include "{header_name}"\n'
 
         elif gen_tag == 'BRIDGE_CALLBACK_DECL':
             for cb_type, cb_name in self._callbacks.items():
