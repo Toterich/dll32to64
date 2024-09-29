@@ -50,8 +50,8 @@ struct VariableArray {
 };
 
 /* Defines a unique ID for each of the DLL functions and callbacks exposed by the wrapped DLL. */
-// TODO: AUTOGEN
 enum MsgId {
+    // [[GEN]] PROTOCOL_H_MSGIDS
     MSGID_Invert = 0,
     MSGID_Interleave,
     MSGID_SetCallback,
@@ -73,9 +73,9 @@ enum Direction
  *
  * Depending on the MessageId, the corresponding union member is the active one.
  */
-// TODO: AUTOGEN
 union StaticData
 {
+    // [[GEN]] PROTOCOL_H_STATIC_DATA
     /*
     * Static Message Data for Callbacks that are executed by the DLL.
     *

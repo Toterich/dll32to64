@@ -2,7 +2,7 @@
   "header": "./test_lib.h",
   "types": {
     "TCallback" : {
-      "variant": "function_ptr",
+      "kind": "function_ptr",
       "params": [
         {
           "name": "val",
@@ -12,7 +12,7 @@
       "ret_type": "void"
     },
     "AStruct" : {
-      "variant": "struct",
+      "kind": "struct",
       "members": {
         "c" : {
           "type": "char"
